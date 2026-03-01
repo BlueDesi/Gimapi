@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gimapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260227132145_SeedInicial")]
-    partial class SeedInicial
+    [Migration("20260301025540_pe")]
+    partial class pe
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,13 +33,21 @@ namespace Gimapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Activa")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("FechaVencimiento")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Membresias");
                 });
@@ -101,8 +109,8 @@ namespace Gimapi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MembresiaId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -117,8 +125,6 @@ namespace Gimapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MembresiaId");
-
                     b.HasIndex("RolId");
 
                     b.ToTable("Usuarios");
@@ -131,6 +137,7 @@ namespace Gimapi.Migrations
                             Apellido = "Gimnasio",
                             DNI = "12345678",
                             Email = "admin@gimapi.com",
+                            FechaNacimiento = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nombre = "Admin",
                             Password = "admin",
                             RolId = 1
@@ -142,25 +149,31 @@ namespace Gimapi.Migrations
                             Apellido = "Prueba",
                             DNI = "99999999",
                             Email = "socio@gimapi.com",
+                            FechaNacimiento = new DateTime(1995, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nombre = "Socio",
                             Password = "socio",
                             RolId = 3
                         });
                 });
 
+            modelBuilder.Entity("Gimapi.Models.Membresia", b =>
+                {
+                    b.HasOne("Gimapi.Models.Usuario", "Usuario")
+                        .WithMany("Membresias")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Gimapi.Models.Usuario", b =>
                 {
-                    b.HasOne("Gimapi.Models.Membresia", "Membresia")
-                        .WithMany()
-                        .HasForeignKey("MembresiaId");
-
                     b.HasOne("Gimapi.Models.Rol", "ObjetoRol")
                         .WithMany("Usuarios")
                         .HasForeignKey("RolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Membresia");
 
                     b.Navigation("ObjetoRol");
                 });
@@ -168,6 +181,11 @@ namespace Gimapi.Migrations
             modelBuilder.Entity("Gimapi.Models.Rol", b =>
                 {
                     b.Navigation("Usuarios");
+                });
+
+            modelBuilder.Entity("Gimapi.Models.Usuario", b =>
+                {
+                    b.Navigation("Membresias");
                 });
 #pragma warning restore 612, 618
         }

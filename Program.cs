@@ -20,12 +20,13 @@ namespace Gimapi
             //inicios
             // Obtener la cadena de conexión del archivo appsettings.json
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddScoped<IUsuarioService, UsuarioServicio>();
             // Registrar el Contexto con la base de datos SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             //
-         
+            builder.Services.AddScoped<IUsuarioService, UsuarioServicio>();
+            builder.Services.AddScoped<IMembresiaService, MembresiaService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

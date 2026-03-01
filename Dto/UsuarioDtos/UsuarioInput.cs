@@ -26,5 +26,8 @@ namespace Gimapi.Dto.UsuarioDtos
         {
             get; set;
         }
+
+        public DateTime FechaNacimiento { get; set; }
+
     }
 }

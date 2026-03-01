@@ -8,6 +8,8 @@
         public string DNI { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string RolNombre { get; set; } = string.Empty;
+        public DateTime FechaNacimiento { get; set; }
+
 
         // Información de membresía procesada para el socio
         public bool TieneMembresia { get; set; }

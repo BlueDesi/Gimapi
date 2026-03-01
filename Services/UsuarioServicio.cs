@@ -1,6 +1,7 @@
 ﻿using Gimapi.Data;
 using Gimapi.Dto.UsuarioDtos;
 using Gimapi.Models;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gimapi.Services
@@ -16,19 +17,20 @@ namespace Gimapi.Services
 
         public async Task<IEnumerable<UsuarioDTO>> ObtenerTodos()
         {
-            return await _context.Usuarios
+            var usuarios = await _context.Usuarios
                 .Include(u => u.ObjetoRol)
-                .Include(u => u.Membresia)
+                .Include(u => u.Membresias)   // ✅ corregido
                 .Where(u => u.Activo)
-                .Select(u => MapToDto(u))
                 .ToListAsync();
+
+            return usuarios.Select(u => MapToDto(u));
         }
 
         public async Task<UsuarioDTO?> ObtenerPorId(int id)
         {
             var usuario = await _context.Usuarios
                 .Include(u => u.ObjetoRol)
-                .Include(u => u.Membresia)
+                .Include(u => u.Membresias)   // ✅ corregido
                 .FirstOrDefaultAsync(u => u.Id == id && u.Activo);
 
             return usuario != null ? MapToDto(usuario) : null;
@@ -42,10 +44,12 @@ namespace Gimapi.Services
                 Apellido = dto.Apellido,
                 DNI = dto.DNI,
                 Email = dto.Email,
-                Password = dto.Password, // TODO: Hashear en etapa de seguridad
+                Password = dto.Password,
                 RolId = dto.RolId,
-                Activo = true
-            };
+                Activo = true,
+                      FechaNacimiento=dto.FechaNacimiento,
+
+    };
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -63,69 +67,65 @@ namespace Gimapi.Services
             return true;
         }
 
-        // Método privado para no repetir lógica de mapeo
-        private static UsuarioDTO MapToDto(Usuario u) => new UsuarioDTO
+        private static UsuarioDTO MapToDto(Usuario u)
         {
-            Id = u.Id,
-            Nombre = u.Nombre,
-            Apellido = u.Apellido,
-            DNI = u.DNI,
-            Email = u.Email,
-            RolNombre = u.ObjetoRol?.NombreRol ?? "Sin Rol",
-            TieneMembresia = u.Membresia != null,
-            MembresiaVigente = u.Membresia?.EstaVigente ?? false,
-            DiasRestantes = u.Membresia?.DiasRestantes ?? 0,
-            FechaVencimiento = u.Membresia?.FechaVencimiento
-        };
+            var membresiaActiva = u.Membresias
+                .OrderByDescending(m => m.FechaVencimiento)
+                .FirstOrDefault(m => m.EstaVigente);
+
+            return new UsuarioDTO
+            {
+                Id = u.Id,
+                Nombre = u.Nombre,
+                Apellido = u.Apellido,
+                DNI = u.DNI,
+                Email = u.Email,
+                RolNombre = u.ObjetoRol?.NombreRol ?? "Sin Rol",
+
+                TieneMembresia = u.Membresias.Any(),
+                MembresiaVigente = membresiaActiva != null,
+                DiasRestantes = membresiaActiva?.DiasRestantes ?? 0,
+                FechaVencimiento = membresiaActiva?.FechaVencimiento,
+                FechaNacimiento = u.FechaNacimiento,
+
+            };
+        }
 
         public async Task<bool> Actualizar(int id, UsuarioInput dto)
         {
-            // 1. Buscamos el usuario existente incluyendo sus relaciones
             var usuarioExistente = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == id && u.Activo);
 
             if (usuarioExistente == null)
-            {
                 return false;
-            }
 
-            // 2. Actualizamos los campos permitidos
             usuarioExistente.Nombre = dto.Nombre;
             usuarioExistente.Apellido = dto.Apellido;
             usuarioExistente.DNI = dto.DNI;
             usuarioExistente.Email = dto.Email;
             usuarioExistente.RolId = dto.RolId;
+            usuarioExistente.FechaNacimiento = dto.FechaNacimiento;
 
-            // Nota: La Password suele manejarse en un método aparte por seguridad, 
-            // pero si el DTO la trae, la actualizamos aquí:
+
             if (!string.IsNullOrEmpty(dto.Password))
             {
                 usuarioExistente.Password = dto.Password;
             }
 
-            // 3. Persistimos los cambios de forma asincrónica
-            // Al usar 'await', el warning desaparece.
-            var filasAfectadas = await _context.SaveChangesAsync();
-
-            return filasAfectadas > 0;
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<UsuarioDTO?> ValidarCredenciales(string email, string password)
         {
-            // Buscamos el usuario que coincida con email y password, y que esté activo
             var usuario = await _context.Usuarios
                 .Include(u => u.ObjetoRol)
-                .Include(u => u.Membresia)
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password && u.Activo);
+                .Include(u => u.Membresias)   // ✅ corregido
+                .FirstOrDefaultAsync(u =>
+                    u.Email == email &&
+                    u.Password == password &&
+                    u.Activo);
 
-            if (usuario == null)
-            {
-                return null;
-            }
-
-            // Retornamos el DTO usando tu método MapToDto
-            return MapToDto(usuario);
+            return usuario != null ? MapToDto(usuario) : null;
         }
     }
 }
-

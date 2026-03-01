@@ -41,7 +41,9 @@ namespace Gimapi.Data
                     Email = "admin@gimapi.com",
                     Password = "admin", // Sin hash temporalmente
                     RolId = 1, // Vinculado al Id de Admin
-                    Activo = true
+                    Activo = true,
+                            FechaNacimiento = new DateTime(1990, 1, 1)
+
                 },
                 new Usuario
                 {
@@ -52,7 +54,9 @@ namespace Gimapi.Data
                     Email = "socio@gimapi.com",
                     Password = "socio",
                     RolId = 3, // Vinculado al Id de Socio
-                    Activo = true
+                    Activo = true,
+                    FechaNacimiento = new DateTime(1995, 5, 10)
+
                 }
             );
 
