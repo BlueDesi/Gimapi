@@ -14,7 +14,12 @@ namespace Gimapi.Controllers
         {
             _service = service;
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var lista = await _service.ObtenerTodasAsync();
+            return Ok(lista);
+        }
         [HttpPost]
         public async Task<IActionResult> Crear(CrearMembresiaInput dto)
         {
@@ -52,5 +57,7 @@ namespace Gimapi.Controllers
             var resultado = await _service.ValidarPorDniAsync(dni.Trim());
             return Ok(resultado);
         }
+
+
     }
 }

@@ -5,7 +5,7 @@ namespace Gimapi.Services
     public interface IMembresiaService
     {
         Task<MembresiaDTO?> CrearAsync(CrearMembresiaInput dto);
-
+        Task<IEnumerable<MembresiaDTO>> ObtenerTodasAsync();
         Task<MembresiaDTO?> ObtenerUltimaPorUsuarioIdAsync(int usuarioId);
         Task<MembresiaDTO?> ObtenerUltimaPorDniAsync(string dni);
 

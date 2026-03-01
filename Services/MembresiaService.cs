@@ -106,7 +106,22 @@ namespace Gimapi.Services
 
             return true;
         }
-
+        public async Task<bool> ValidarPorUsuarioIdAsync(int usuarioId)
+        {
+       
+            return await _context.Membresias
+                .AnyAsync(m => m.UsuarioId == usuarioId &&
+                               m.Activa &&
+                               m.FechaVencimiento >= DateTime.Now);
+        }
+        public async Task<IEnumerable<MembresiaDTO>> ObtenerTodasAsync()
+        {
+            return await _context.Membresias
+                .Include(m => m.Usuario) // Para saber de quién es la membresía
+                .OrderByDescending(m => m.FechaInicio) // Orden profesional: las más nuevas primero
+                .Select(m => MapToDto(m))
+                .ToListAsync();
+        }
         public async Task<ValidacionMembresiaDTO> ValidarPorDniAsync(string dni)
         {
             dni = dni.Trim();

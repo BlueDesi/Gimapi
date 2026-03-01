@@ -14,7 +14,8 @@ namespace Gimapi.Services
         {
             _context = context;
         }
-
+        //
+        //
         public async Task<IEnumerable<UsuarioDTO>> ObtenerTodos()
         {
             var usuarios = await _context.Usuarios
@@ -64,7 +65,7 @@ namespace Gimapi.Services
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-
+            await _context.Entry(usuario).Reference(u => u.ObjetoRol).LoadAsync();
             return MapToDto(usuario);
         }
 
@@ -138,5 +139,52 @@ namespace Gimapi.Services
 
             return usuario != null ? MapToDto(usuario) : null;
         }
+
+        public async Task<IEnumerable<UsuarioDTO>> ObtenerSocios(bool soloActivos = true)
+    => await ObtenerPorRol(3, soloActivos);
+
+        public async Task<IEnumerable<UsuarioDTO>> ObtenerEmpleados(bool soloActivos = true)
+            => await ObtenerPorRol(2, soloActivos);
+
+        public async Task<IEnumerable<UsuarioDTO>> ObtenerAdmins(bool soloActivos = true)
+            => await ObtenerPorRol(1, soloActivos);
+
+        // Método privado reutilizable para evitar repetir código (DRY)
+        private async Task<IEnumerable<UsuarioDTO>> ObtenerPorRol(int rolId, bool soloActivos)
+        {
+            var query = _context.Usuarios
+                .Include(u => u.ObjetoRol)
+                .Include(u => u.Membresias)
+                .Where(u => u.RolId == rolId);
+
+            if (soloActivos)
+            {
+                query = query.Where(u => u.Activo);
+            }
+
+            return await query
+                .Select(u => MapToDto(u))
+                .ToListAsync();
+        }
+
+
+        public async Task<bool> ValidarPorUsuarioIdAsync(int usuarioId)
+        {
+            // Buscamos el usuario incluyendo sus membresías para usar la lógica de vigencia
+            var usuario = await _context.Usuarios
+                .Include(u => u.Membresias)
+                .FirstOrDefaultAsync(u => u.Id == usuarioId && u.Activo);
+
+            if (usuario == null)
+            {
+                return false;
+            }
+
+            // Retorna true si tiene alguna membresía cuya propiedad EstaVigente sea true
+            return usuario.Membresias.Any(m => m.EstaVigente);
+        }
+
+
+
     }
 }

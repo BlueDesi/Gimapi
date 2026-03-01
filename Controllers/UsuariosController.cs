@@ -84,5 +84,39 @@ namespace Gimapi.Controllers
             if (!exito) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("socios")]
+        public async Task<IActionResult> GetSocios([FromQuery] bool incluirInactivos = false)
+        {
+            var usuarios = await _usuarioServicio.ObtenerSocios(!incluirInactivos);
+            return Ok(usuarios);
+        }
+
+        [HttpGet("empleados")]
+        public async Task<IActionResult> GetEmpleados([FromQuery] bool incluirInactivos = false)
+        {
+            var usuarios = await _usuarioServicio.ObtenerEmpleados(!incluirInactivos);
+            return Ok(usuarios);
+        }
+
+        [HttpGet("admins")]
+        public async Task<IActionResult> GetAdmins([FromQuery] bool incluirInactivos = false)
+        {
+            var usuarios = await _usuarioServicio.ObtenerAdmins(!incluirInactivos);
+            return Ok(usuarios);
+        }
+        [HttpGet("{id}/validar-acceso-id")]
+        public async Task<IActionResult> ValidarAcceso(int id)
+        {
+            var tieneAcceso = await _usuarioServicio.ValidarPorUsuarioIdAsync(id);
+
+            if (!tieneAcceso)
+            {
+                return Ok(new { status = "Denegado", mensaje = "El socio no tiene membresía vigente." });
+            }
+
+            return Ok(new { status = "Concedido", mensaje = "Acceso permitido." });
+        }
+
     }
 }
