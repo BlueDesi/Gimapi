@@ -38,8 +38,16 @@ namespace Gimapi.Controllers
         [HttpPost]
         public async Task<ActionResult<UsuarioDTO>> PostUsuario(UsuarioInput dto)
         {
-            var resultado = await _usuarioServicio.Crear(dto);
-            return CreatedAtAction(nameof(GetUsuario), new { id = resultado.Id }, resultado);
+            try
+            {
+                var resultado = await _usuarioServicio.Crear(dto);
+                return CreatedAtAction(nameof(GetUsuario), new { id = resultado.Id }, resultado);
+            }
+            catch (Exception ex)
+            {
+                // En lugar de 500, devolvemos 400 con el mensaje que definimos en el Service
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         // POST: api/Usuarios/login (AQUÍ ESTÁ EL MÉTODO QUE BUSCABAS)

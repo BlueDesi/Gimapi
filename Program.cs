@@ -26,7 +26,7 @@ namespace Gimapi
             //
             builder.Services.AddScoped<IUsuarioService, UsuarioServicio>();
             builder.Services.AddScoped<IMembresiaService, MembresiaService>();
-
+            builder.Services.AddScoped<IRolService, RolService>(); // Registro del nuevo servicio de Roles
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

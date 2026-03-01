@@ -12,7 +12,6 @@
         public DateTime FechaNacimiento { get; set; }
         public bool Activo { get; set; } = true;
 
-        // Relación con Rol (1 a muchos)
         public int RolId { get; set; }
         public Rol? ObjetoRol { get; set; }
 

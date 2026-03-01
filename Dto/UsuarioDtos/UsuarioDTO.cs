@@ -10,7 +10,7 @@
         public string RolNombre { get; set; } = string.Empty;
         public DateTime FechaNacimiento { get; set; }
 
-
+        //tor
         // Información de membresía procesada para el socio
         public bool TieneMembresia { get; set; }
         public bool MembresiaVigente { get; set; }

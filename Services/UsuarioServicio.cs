@@ -38,6 +38,16 @@ namespace Gimapi.Services
 
         public async Task<UsuarioDTO> Crear(UsuarioInput dto)
         {
+            if (dto.RolId == null || dto.RolId == 0)
+            {
+                dto.RolId = 3;
+            }
+            var rolExiste = await _context.Roles.AnyAsync(r => r.Id == dto.RolId && r.Activo);
+
+            if (!rolExiste)
+            {
+                throw new Exception($"El Rol con ID {dto.RolId} no existe en el sistema.");
+            }
             var usuario = new Usuario
             {
                 Nombre = dto.Nombre,
@@ -45,9 +55,10 @@ namespace Gimapi.Services
                 DNI = dto.DNI,
                 Email = dto.Email,
                 Password = dto.Password,
+          
                 RolId = dto.RolId,
                 Activo = true,
-                      FechaNacimiento=dto.FechaNacimiento,
+                FechaNacimiento=dto.FechaNacimiento,
 
     };
 
