@@ -39,33 +39,56 @@ namespace Gimapi.Services
 
         public async Task<UsuarioDTO> Crear(UsuarioInput dto)
         {
+            // 1. Validar duplicados de DNI
+            var existeDni = await _context.Usuarios
+                .AnyAsync(u => u.DNI == dto.DNI);
+
+            if (existeDni)
+            {
+                throw new Exception("El DNI ingresado ya se encuentra registrado.");
+            }
+
+            // 2. Validar duplicados de Email
+            var existeEmail = await _context.Usuarios
+                .AnyAsync(u => u.Email == dto.Email);
+
+            if (existeEmail)
+            {
+                throw new Exception("El correo electrónico ya se encuentra registrado.");
+            }
+
+            // 3. Asignación de Rol por defecto (Socio = 3) si no se especifica
             if (dto.RolId == null || dto.RolId == 0)
             {
                 dto.RolId = 3;
             }
-            var rolExiste = await _context.Roles.AnyAsync(r => r.Id == dto.RolId && r.Activo);
+
+            // 4. Validar que el Rol exista y esté activo
+            var rolExiste = await _context.Roles
+                .AnyAsync(r => r.Id == dto.RolId && r.Activo);
 
             if (!rolExiste)
             {
-                throw new Exception($"El Rol con ID {dto.RolId} no existe en el sistema.");
+                throw new Exception($"El Rol con ID {dto.RolId} no existe en el sistema o está inactivo.");
             }
+
+            // 5. Mapeo a la entidad y persistencia
             var usuario = new Usuario
             {
                 Nombre = dto.Nombre,
                 Apellido = dto.Apellido,
                 DNI = dto.DNI,
                 Email = dto.Email,
-                Password = dto.Password,
-          
+                Password = dto.Password, // Nota: Se recomienda aplicar Hash aquí
                 RolId = dto.RolId,
                 Activo = true,
-                FechaNacimiento=dto.FechaNacimiento,
-
-    };
+                FechaNacimiento = dto.FechaNacimiento
+            };
 
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-            await _context.Entry(usuario).Reference(u => u.ObjetoRol).LoadAsync();
+
+            // 6. Retornar el DTO (usando su método de mapeo existente)
             return MapToDto(usuario);
         }
 

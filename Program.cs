@@ -17,9 +17,28 @@ namespace Gimapi
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            //inicios
+            //
+            var env = builder.Environment;
+
+            // 2. Elegir la cadena de conexión según el entorno
+            string connectionString;
+
+            if (env.IsDevelopment())
+            {
+                // Usa la local si estás en Visual Studio
+                connectionString = builder.Configuration.GetConnectionString("LocalConnection");
+            }
+            else
+            {
+                // Usa la del servidor si ya está publicado
+                connectionString = builder.Configuration.GetConnectionString("RemoteConnection");
+            }
+
+            // 3. Registrar el DbContext con la variable dinámica
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            //
             // Obtener la cadena de conexión del archivo appsettings.json
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             // Registrar el Contexto con la base de datos SQL Server
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -33,9 +52,20 @@ namespace Gimapi
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gimapi v1");
+                   // c.RoutePrefix = string.Empty; // Esto hace que Swagger cargue al entrar a la URL principal
+                });
             }
-
+            //app.UseSwagger();
+           // app.UseSwaggerUI();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gimapi v1");
+                c.RoutePrefix = string.Empty; // Esto hace que Swagger cargue al entrar a la URL principal
+            });
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
