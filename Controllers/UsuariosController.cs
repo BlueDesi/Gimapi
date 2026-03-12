@@ -42,9 +42,9 @@ namespace Gimapi.Controllers
 
         // POST: api/Usuarios (REGISTRO)
         [HttpPost]
-        [AllowAnonymous]
+       // [AllowAnonymous]
 
-        //[Authorize(Roles = "Admin,Empleado")]
+        [Authorize(Roles = "Admin,Empleado")]
         public async Task<ActionResult<UsuarioDTO>> PostUsuario(UsuarioInput dto)
         {
             try

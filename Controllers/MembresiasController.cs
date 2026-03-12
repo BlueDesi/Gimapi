@@ -37,8 +37,7 @@ namespace Gimapi.Controllers
         }
 
         [HttpGet("usuario/{usuarioId}")]
-        [Authorize(Roles = "Admin,Empleado")]
-
+        [Authorize]
         public async Task<IActionResult> ObtenerPorUsuario(int usuarioId)
             => Ok(await _service.ObtenerPorUsuarioIdAsync(usuarioId));
 
