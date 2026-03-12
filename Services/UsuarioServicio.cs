@@ -2,6 +2,8 @@
 using Gimapi.Dto.UsuarioDtos;
 using Gimapi.Models;
 using Humanizer;
+using BCrypt.Net;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gimapi.Services
@@ -79,7 +81,8 @@ namespace Gimapi.Services
                 Apellido = dto.Apellido,
                 DNI = dto.DNI,
                 Email = dto.Email,
-                Password = dto.Password, // Nota: Se recomienda aplicar Hash aquí
+                // Password = dto.Password, // Nota: Se recomienda aplicar Hash aquí
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 RolId = dto.RolId,
                 Activo = true,
                 FechaNacimiento = dto.FechaNacimiento
@@ -152,15 +155,18 @@ namespace Gimapi.Services
 
         public async Task<UsuarioDTO?> ValidarCredenciales(string email, string password)
         {
+            // Buscamos solo por Email (el Password en DB es un HASH, no coincide con el string 'password')
             var usuario = await _context.Usuarios
                 .Include(u => u.ObjetoRol)
-                .Include(u => u.Membresias)   // ✅ corregido
-                .FirstOrDefaultAsync(u =>
-                    u.Email == email &&
-                    u.Password == password &&
-                    u.Activo);
+                .Include(u => u.Membresias)
+                .FirstOrDefaultAsync(u => u.Email == email && u.Activo);
 
-            return usuario != null ? MapToDto(usuario) : null;
+            // Verificamos el hash con la librería BCrypt
+            if (usuario != null && BCrypt.Net.BCrypt.Verify(password, usuario.Password))
+            {
+                return MapToDto(usuario);
+            }
+            return null;
         }
 
         public async Task<IEnumerable<UsuarioDTO>> ObtenerSocios(bool soloActivos = true)

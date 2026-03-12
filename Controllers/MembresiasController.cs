@@ -1,5 +1,6 @@
 ﻿using Gimapi.Dto.MembresiaDtos;
 using Gimapi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gimapi.Controllers
@@ -15,12 +16,16 @@ namespace Gimapi.Controllers
             _service = service;
         }
         [HttpGet]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> GetAll()
         {
             var lista = await _service.ObtenerTodasAsync();
             return Ok(lista);
         }
         [HttpPost]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> Crear(CrearMembresiaInput dto)
         {
             var result = await _service.CrearAsync(dto);
@@ -32,18 +37,26 @@ namespace Gimapi.Controllers
         }
 
         [HttpGet("usuario/{usuarioId}")]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> ObtenerPorUsuario(int usuarioId)
             => Ok(await _service.ObtenerPorUsuarioIdAsync(usuarioId));
 
         [HttpGet("activas")]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> Activas()
             => Ok(await _service.ObtenerActivasAsync());
 
         [HttpGet("inactivas")]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> Inactivas()
             => Ok(await _service.ObtenerInactivasAsync());
 
         [HttpPut("baja/{id}")]
+        [Authorize(Roles = "Admin,Empleado")]
+
         public async Task<IActionResult> Baja(int id)
         {
             var ok = await _service.DarDeBajaAsync(id);
@@ -52,6 +65,7 @@ namespace Gimapi.Controllers
         }
 
         [HttpGet("validar/{dni}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Validar(string dni)
         {
             var resultado = await _service.ValidarPorDniAsync(dni.Trim());

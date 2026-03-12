@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Gimapi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260301025540_pe")]
-    partial class pe
+    [Migration("20260306003951_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,9 @@ namespace Gimapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NombreRol")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -72,16 +75,19 @@ namespace Gimapi.Migrations
                         new
                         {
                             Id = 1,
+                            Activo = true,
                             NombreRol = "Admin"
                         },
                         new
                         {
                             Id = 2,
+                            Activo = true,
                             NombreRol = "Empleado"
                         },
                         new
                         {
                             Id = 3,
+                            Activo = true,
                             NombreRol = "Socio"
                         });
                 });
@@ -134,25 +140,13 @@ namespace Gimapi.Migrations
                         {
                             Id = 1,
                             Activo = true,
-                            Apellido = "Gimnasio",
+                            Apellido = "Sistema",
                             DNI = "12345678",
                             Email = "admin@gimapi.com",
                             FechaNacimiento = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nombre = "Admin",
-                            Password = "admin",
+                            Password = "$2a$11$h.B.f6mS8.5P9mH7H9z1Ou3Jp5X7E5v1B9mH7H9z1Ou3Jp5X7E5v1",
                             RolId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Activo = true,
-                            Apellido = "Prueba",
-                            DNI = "99999999",
-                            Email = "socio@gimapi.com",
-                            FechaNacimiento = new DateTime(1995, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Nombre = "Socio",
-                            Password = "socio",
-                            RolId = 3
                         });
                 });
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Gimapi.Migrations
 {
     /// <inheritdoc />
-    public partial class pe : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,8 @@ namespace Gimapi.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    NombreRol = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    NombreRol = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Activo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,22 +77,18 @@ namespace Gimapi.Migrations
 
             migrationBuilder.InsertData(
                 table: "Roles",
-                columns: new[] { "Id", "NombreRol" },
+                columns: new[] { "Id", "Activo", "NombreRol" },
                 values: new object[,]
                 {
-                    { 1, "Admin" },
-                    { 2, "Empleado" },
-                    { 3, "Socio" }
+                    { 1, true, "Admin" },
+                    { 2, true, "Empleado" },
+                    { 3, true, "Socio" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Usuarios",
                 columns: new[] { "Id", "Activo", "Apellido", "DNI", "Email", "FechaNacimiento", "Nombre", "Password", "RolId" },
-                values: new object[,]
-                {
-                    { 1, true, "Gimnasio", "12345678", "admin@gimapi.com", new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "admin", 1 },
-                    { 2, true, "Prueba", "99999999", "socio@gimapi.com", new DateTime(1995, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Socio", "socio", 3 }
-                });
+                values: new object[] { 1, true, "Sistema", "12345678", "admin@gimapi.com", new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "$2a$11$h.B.f6mS8.5P9mH7H9z1Ou3Jp5X7E5v1B9mH7H9z1Ou3Jp5X7E5v1", 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Membresias_UsuarioId",

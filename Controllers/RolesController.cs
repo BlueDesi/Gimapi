@@ -1,5 +1,6 @@
 ﻿using Gimapi.Dto.RolDtos;
 using Gimapi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,8 @@ namespace Gimapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class RolesController : ControllerBase
     {
         private readonly IRolService _rolService;
@@ -17,6 +20,8 @@ namespace Gimapi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Listar() => Ok(await _rolService.ObtenerTodos());
 
         [HttpGet("{id}")]
@@ -27,6 +32,8 @@ namespace Gimapi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Crear(RolInput dto)
         {
             var resultado = await _rolService.Crear(dto);
@@ -34,6 +41,8 @@ namespace Gimapi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Modificar(int id, RolInput dto)
         {
             var exito = await _rolService.Actualizar(id, dto);
@@ -41,6 +50,8 @@ namespace Gimapi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Eliminar(int id)
         {
             var exito = await _rolService.BajaLogica(id);

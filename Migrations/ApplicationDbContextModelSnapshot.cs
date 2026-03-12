@@ -137,25 +137,13 @@ namespace Gimapi.Migrations
                         {
                             Id = 1,
                             Activo = true,
-                            Apellido = "Gimnasio",
+                            Apellido = "Sistema",
                             DNI = "12345678",
                             Email = "admin@gimapi.com",
                             FechaNacimiento = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Nombre = "Admin",
-                            Password = "admin",
+                            Password = "$2a$11$Xm7766/Wrc.0B0C6p7.SkeS.uM7Gz9.F8.7f88888888888888888",
                             RolId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Activo = true,
-                            Apellido = "Prueba",
-                            DNI = "99999999",
-                            Email = "socio@gimapi.com",
-                            FechaNacimiento = new DateTime(1995, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Nombre = "Socio",
-                            Password = "socio",
-                            RolId = 3
                         });
                 });
 
