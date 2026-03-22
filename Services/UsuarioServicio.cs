@@ -132,25 +132,37 @@ namespace Gimapi.Services
         public async Task<bool> Actualizar(int id, UsuarioInput dto)
         {
             var usuarioExistente = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Id == id && u.Activo);
+        .FirstOrDefaultAsync(u => u.Id == id && u.Activo);
 
-            if (usuarioExistente == null)
-                return false;
+            if (usuarioExistente == null) return false;
 
+            // Actualización de datos comunes
             usuarioExistente.Nombre = dto.Nombre;
             usuarioExistente.Apellido = dto.Apellido;
             usuarioExistente.DNI = dto.DNI;
             usuarioExistente.Email = dto.Email;
-            usuarioExistente.RolId = dto.RolId;
+            if (usuarioExistente.RolId == 0)
+            { usuarioExistente.RolId = 3; }
+            else
+            {
+                usuarioExistente.RolId = dto.RolId;
+            }
             usuarioExistente.FechaNacimiento = dto.FechaNacimiento;
 
-
-            if (!string.IsNullOrEmpty(dto.Password))
+            // Forzar el uso de BCrypt.Net explícitamente
+            if (!string.IsNullOrWhiteSpace(dto.Password))
             {
-                usuarioExistente.Password = dto.Password;
+                // 1. Generar el hash explícitamente
+                string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+                // 2. Asignar al modelo
+                usuarioExistente.Password = passwordHasheada;
             }
 
-            return await _context.SaveChangesAsync() > 0;
+            // El SaveChangesAsync es obligatorio para persistir
+            var resultado = await _context.SaveChangesAsync();
+
+            return resultado > 0;
         }
 
         public async Task<UsuarioDTO?> ValidarCredenciales(string email, string password)
